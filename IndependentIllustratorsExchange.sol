@@ -28,7 +28,10 @@ contract IndependentIllustratorsExchange
     
     mapping (address => Illustrator) public Illustrators;
     mapping (address => bool) public Inscriptions;
+    
     mapping (uint => Request) public Requests;
+    mapping (uint => Illustrator[]) public Applications;
+    
     uint RequestCounter = 0;
     
     function Subscribe(string memory illustratorName) public
@@ -42,6 +45,19 @@ contract IndependentIllustratorsExchange
        Request memory request = Request(RequestState.Open, msg.sender, 10, acceptDelaySeconds, description, minReputation);
        Requests[RequestCounter] =  request;
        RequestCounter++;
+   }
+   
+   function ApplyToRequest(uint requestId) public
+   {
+       require(Requests[requestId].State == RequestState.Open, "Should be open request");
+       require(Illustrators[msg.sender].Reputation >= Requests[requestId].MinReputation, "Not enough reputation");
+       
+       Applications[requestId].push(Illustrators[msg.sender]);
+   }
+   
+   function AcceptApplication(uint requestId, address illustratorsAddress)
+   {
+       
    }
    
    function GetRequests() public returns (Request[] memory)
@@ -58,3 +74,4 @@ contract IndependentIllustratorsExchange
        return requests;
    }
 }
+
