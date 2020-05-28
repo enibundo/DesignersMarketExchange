@@ -25,30 +25,35 @@ contract IndependentIllustratorsExchange
         string Description;
         uint MinReputation;
         Illustrator[] Applications;
-        Illustrator ChosenApplication;
+        address ChosenApplication;
     }
     
     mapping (address => Illustrator) public Illustrators;
-    mapping (address => bool) public Inscriptions;
+    mapping (address => bool) public Subscriptions;
     
     Request[] public Requests;
     
     function Subscribe(string memory illustratorName) public
     {
-        require(Inscriptions[msg.sender] == false, "Already subscribed.");
+        require(Subscriptions[msg.sender] == false, "Already subscribed.");
         Illustrators[msg.sender] = Illustrator(1, illustratorName);
     }
     
-   function CreateRequest(uint acceptDelaySeconds, string memory description, uint minReputation) public
+   function CreateRequest(uint acceptDelaySeconds, string memory description, uint minReputation) payable public
    {
+       require (Subscriptions[msg.sender] == true, "Should be subscribed before creation request");
+       
+       // 2% fee
+       uint paymentInWei = SafeMath.div(msg.value, uint(1.02));
+       
        Request memory request = Request(RequestState.Open, 
                                         msg.sender, 
-                                        10, 
+                                        paymentInWei, 
                                         acceptDelaySeconds, 
                                         description, 
                                         minReputation, 
                                         new Illustrator[](0), 
-                                        Illustrator(0, ""));
+                                        address(0));
        Requests.push(request);
    }
    
@@ -64,11 +69,19 @@ contract IndependentIllustratorsExchange
    {
        require(Requests[requestId].Requester == msg.sender, "Cannot accept application, not request creator");
        Requests[requestId].State = RequestState.Ongoing;
-       Requests[requestId].ChosenApplication = Illustrators[illustratorsAddress];
+       Requests[requestId].ChosenApplication = illustratorsAddress;
    }
    
    function GetRequests() public returns (Request[] memory)
    {
        return Requests;
+   }
+   
+   function Deliver(uint requestId) public 
+   {
+       require (Illustrators[msg.sender].Reputation > 0, "Should be a registered Illustrator");
+       require (Requests[requestId].ChosenApplication == msg.sender, "You are not the chosen application");
+       
+       msg.sender.send(Requests[requestId].PaymentWei);
    }
 }
