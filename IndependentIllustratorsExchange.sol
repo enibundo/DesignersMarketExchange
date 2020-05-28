@@ -24,15 +24,14 @@ contract IndependentIllustratorsExchange
         uint AcceptDelaySeconds;
         string Description;
         uint MinReputation;
+        Illustrator[] Applications;
+        Illustrator ChosenApplication;
     }
     
     mapping (address => Illustrator) public Illustrators;
     mapping (address => bool) public Inscriptions;
     
-    mapping (uint => Request) public Requests;
-    mapping (uint => Illustrator[]) public Applications;
-    
-    uint RequestCounter = 0;
+    Request[] public Requests;
     
     function Subscribe(string memory illustratorName) public
     {
@@ -42,9 +41,15 @@ contract IndependentIllustratorsExchange
     
    function CreateRequest(uint acceptDelaySeconds, string memory description, uint minReputation) public
    {
-       Request memory request = Request(RequestState.Open, msg.sender, 10, acceptDelaySeconds, description, minReputation);
-       Requests[RequestCounter] =  request;
-       RequestCounter++;
+       Request memory request = Request(RequestState.Open, 
+                                        msg.sender, 
+                                        10, 
+                                        acceptDelaySeconds, 
+                                        description, 
+                                        minReputation, 
+                                        new Illustrator[](0), 
+                                        Illustrator(0, ""));
+       Requests.push(request);
    }
    
    function ApplyToRequest(uint requestId) public
@@ -52,26 +57,18 @@ contract IndependentIllustratorsExchange
        require(Requests[requestId].State == RequestState.Open, "Should be open request");
        require(Illustrators[msg.sender].Reputation >= Requests[requestId].MinReputation, "Not enough reputation");
        
-       Applications[requestId].push(Illustrators[msg.sender]);
+       Requests[requestId].Applications.push(Illustrators[msg.sender]);
    }
    
-   function AcceptApplication(uint requestId, address illustratorsAddress)
+   function AcceptApplication(uint requestId, address illustratorsAddress) public
    {
-       
+       require(Requests[requestId].Requester == msg.sender, "Cannot accept application, not request creator");
+       Requests[requestId].State = RequestState.Ongoing;
+       Requests[requestId].ChosenApplication = Illustrators[illustratorsAddress];
    }
    
    function GetRequests() public returns (Request[] memory)
    {
-       uint i = 0;
-       
-       Request[] memory requests = new Request[](RequestCounter);
-       
-       for (i = 0 ; i  < RequestCounter; i++)
-       {
-           requests[i] = Requests[i];
-       }
-       
-       return requests;
+       return Requests;
    }
 }
-
