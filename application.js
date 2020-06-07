@@ -1,28 +1,262 @@
-window.addEventListener('load', async () => {
-    // Modern dapp browsers...
-    if (window.ethereum) {
-        window.web3 = new Web3(ethereum);
-        try {
-            // Request account access if needed
-            await ethereum.enable();
-            // Acccounts now exposed
-            web3.eth.sendTransaction({/* ... */});
-        } catch (error) {
-            // User denied account access...
-        }
-    }
-    // Legacy dapp browsers...
-    else if (window.web3) {
-        window.web3 = new Web3(web3.currentProvider);
-        // Acccounts always exposed
-        web3.eth.sendTransaction({/* ... */});
-    }
-    // Non-dapp browsers...
-    else {
-        console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
-    }
-});
+let contract="0xec5ceb302bf9d2137f553ab1ffb5af39a775ca26";
+let abi=[
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "requestId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "illustratorsAddress",
+				"type": "address"
+			}
+		],
+		"name": "AcceptApplication",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "requestId",
+				"type": "uint256"
+			}
+		],
+		"name": "ApplyToRequest",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "acceptDelaySeconds",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "description",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "minReputation",
+				"type": "uint256"
+			}
+		],
+		"name": "CreateRequest",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "requestId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "artifact",
+				"type": "bytes32"
+			}
+		],
+		"name": "Deliver",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "illustratorName",
+				"type": "string"
+			},
+			{
+				"internalType": "enum IndependentIllustratorsExchange.SubscriptionType",
+				"name": "subscriptionType",
+				"type": "uint8"
+			}
+		],
+		"name": "Subscribe",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "GetRequests",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "enum IndependentIllustratorsExchange.RequestState",
+						"name": "State",
+						"type": "uint8"
+					},
+					{
+						"internalType": "address",
+						"name": "Requester",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "PaymentWei",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "AcceptDelaySeconds",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "Description",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "MinReputation",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address[]",
+						"name": "Applications",
+						"type": "address[]"
+					},
+					{
+						"internalType": "address",
+						"name": "ChosenApplication",
+						"type": "address"
+					},
+					{
+						"internalType": "bytes32",
+						"name": "Artifact",
+						"type": "bytes32"
+					}
+				],
+				"internalType": "struct IndependentIllustratorsExchange.Request[]",
+				"name": "",
+				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "Illustrators",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "Reputation",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "Name",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "Requests",
+		"outputs": [
+			{
+				"internalType": "enum IndependentIllustratorsExchange.RequestState",
+				"name": "State",
+				"type": "uint8"
+			},
+			{
+				"internalType": "address",
+				"name": "Requester",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "PaymentWei",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "AcceptDelaySeconds",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "Description",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "MinReputation",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "ChosenApplication",
+				"type": "address"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "Artifact",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "Subscriptions",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+];
 
+
+async function viewRequests()
+{    
+    let c = new ethers.Contract(contract, abi, dapp.provider.getSigner());
+    c.GetRequests().then((reqs) => {
+	console.log(c);
+    });
+}
 
 async function connectToMetaMask() {
     try {
@@ -35,3 +269,5 @@ async function connectToMetaMask() {
 	console.error(err);
     }
 }
+
+connectToMetaMask();
