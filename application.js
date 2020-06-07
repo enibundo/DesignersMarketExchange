@@ -254,7 +254,11 @@ async function viewRequests()
 {    
     let c = new ethers.Contract(contract, abi, dapp.provider.getSigner());
     c.GetRequests().then((reqs) => {
-	console.log(c);
+	for (i=0; i<reqs.length; i++)
+	{
+	    var req = reqs[i];
+	    console.log(req);
+	}	
     });
 }
 
