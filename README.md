@@ -2,7 +2,7 @@
 Just a small poc of an 'Designers Exchange' dApp
 
 Subscription: 
-![Subscribe](subscribe.png)
+![Subscription](subscription.png)
 
 Requests: 
 ![Requests](requests.png)
