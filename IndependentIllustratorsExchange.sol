@@ -20,7 +20,8 @@ contract IndependentIllustratorsExchange
     
     struct Request 
     {
-        RequestState State;
+	uint CreationTimestamp;
+	RequestState State;
         address Requester;
         uint PaymentWei;
         uint AcceptDelaySeconds;

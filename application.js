@@ -1,3 +1,4 @@
+// --- config
 let contract="0xec5ceb302bf9d2137f553ab1ffb5af39a775ca26";
 let abi=[
 	{
@@ -249,17 +250,79 @@ let abi=[
 	}
 ];
 
+// --- callback functions
+
+function subscribe()
+{
+    var _mxContract = new ethers.Contract(contract, abi, dapp.provider.getSigner());
+
+    let name=$('#subscriptionName').val();
+    let t = parseInt($('#subscriptionType').val());
+    
+    _mxContract.Subscribe(name, t).then((resp)=>
+					{
+					    console.log(resp);
+					}
+				       );
+}
+
+async function viewSubscribe()
+{
+    let content = "&nbsp; &nbsp; <center><pre><form class='form'>"
+	+ "Name: "
+	+ "<input type='text' id='subscriptionName' style='border: 0; border-bottom: 1px solid black;'></input>"
+	+ " <br/><br/>"
+    
+	+ "Type: " 
+	+ "<input type='text' id='subscriptionType' style='border: 0; border-bottom: 1px solid black;'></input>"
+	+ "</form>"
+	+ "<a href='#' onclick='subscribe()'>Create</a></pre></center>";
+    
+    $("#content").html(content);
+}
 
 async function viewRequests()
 {    
-    let c = new ethers.Contract(contract, abi, dapp.provider.getSigner());
-    c.GetRequests().then((reqs) => {
-	for (i=0; i<reqs.length; i++)
+    let body = "<pre>";
+    var _mxContract = new ethers.Contract(contract, abi, dapp.provider.getSigner());
+    
+    _mxContract.GetRequests().then((reqs) => {
+
+	console.log("Response :");
+	console.log(reqs);
+	
+	for (i = 0; i < reqs.length; i++)
 	{
 	    var req = reqs[i];
-	    console.log(req);
-	}	
+
+	    // + "    | Title: " + "'"
+	    // + req.Value
+	    // + " <br/>"
+
+	    body +=
+	    	  "<a href=''>[A] </a>| "
+	    	+       "Description: '"
+		+ req.Description
+		+ "'<br/>"
+	    
+		+ "    | Author: " + "'"
+	        + req.Requester
+		+ "' <br/>"
+
+		+ "    | Min reputation: "
+		+ req.MinReputation
+	        + "<br/>"
+
+		+ "    | Applications: "
+		+ req.Applications.length;
+	}
+
+	body += "</pre>";
+
+	$('#content').html(body);
+	
     });
+    
 }
 
 async function connectToMetaMask() {
@@ -274,4 +337,5 @@ async function connectToMetaMask() {
     }
 }
 
+// -- main
 connectToMetaMask();
