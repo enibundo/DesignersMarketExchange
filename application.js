@@ -266,6 +266,27 @@ function subscribe()
 				       );
 }
 
+function applyToRequest(requestId)
+{
+    var _mxContract = new ethers.Contract(contract, abi, dapp.provider.getSigner());
+
+    _mxContract.ApplyToRequest(requestId).then((r) => {
+	console.log(r);
+    });
+}
+
+function createRequest()
+{
+    var description = $("#createDescription");
+    var acceptedDelay = $("#createAcceptedDelay");
+    var reputation = $("#createMinimumReputation");
+
+    // todo : fix/finish this.
+    _mxContract.CreateRequest(description, acceptedDelay, reputation).then((r) => {
+	console.log(r);
+    });
+}
+
 async function viewSubscribe()
 {
     let content = "&nbsp; &nbsp; <center><pre><form class='form'>"
@@ -295,12 +316,34 @@ async function viewRequests()
 	{
 	    var req = reqs[i];
 
+	    var alreadyApplied = false;
+	    
+	    for (j = 0; j < req.Applications.length; j++)
+	    {
+		if (req.Applications[j].toLowerCase() == dapp.address.toLowerCase())
+		{		    
+		    alreadyApplied = true;
+		    break;
+		}
+	    }
+
+	    console.log(alreadyApplied);
+	    
 	    // + "    | Title: " + "'"
 	    // + req.Value
 	    // + " <br/>"
 
+	    var icon = "A";
+	    var onClickAction = "applyToRequest("+i+")";
+	    
+	    if (alreadyApplied)
+	    {
+		onClickAction = "return false;";
+		icon = "&check;";
+	    }
+	    
 	    body +=
-	    	  "<a href=''>[A] </a>| "
+	    	  "<a href='#' onclick='"+onClickAction+"'>["+icon+"]</a> | "
 	    	+       "Description: '"
 		+ req.Description
 		+ "'<br/>"
@@ -314,14 +357,47 @@ async function viewRequests()
 	        + "<br/>"
 
 		+ "    | Applications: "
-		+ req.Applications.length;
+		+ req.Applications.length
+		+ "<br/>"
+		+ "    | Already Applied: ";
+	    
+
+	   
+	    if (alreadyApplied)
+	    {
+		body += "Yes";
+	    }
+	    else
+	    {
+		body += "No";
+	    }
+	    
+	    body += "</pre>";
+	    
+	    $('#content').html(body);
 	}
+    });   
+}
 
-	body += "</pre>";
+async function viewCreateRequest()
+{
+    let content = "&nbsp; &nbsp; <center><pre><form class='form'>"
 
-	$('#content').html(body);
-	
-    });
+
+	+ "Description: "
+	+ "<input type='text' id='createDescription' style='border: 0; border-bottom: 1px solid black;'></input>"
+	+ " <br/><br/>"
+
+	+ "Accepted Delay in Seconds: "
+	+ "<input type='text' id='createAcceptedDelay' style='border: 0; border-bottom: 1px solid black;'></input>"
+	+ " <br/><br/>"
+
+	+ "Minimum Reputation: "
+	+ "<input type='text' id='createMinimumReputation' style='border: 0; border-bottom: 1px solid black;'></input>"
+	+ "</form>"
+	+ "<a href='#' onclick='createRequest()'>Create</a></pre></center>";
+    
+    $("#content").html(content);
     
 }
 
