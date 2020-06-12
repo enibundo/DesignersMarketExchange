@@ -1,6 +1,89 @@
 // --- config
-let contract="0xec5ceb302bf9d2137f553ab1ffb5af39a775ca26";
+let contract="0x639dbd04bef9fabd7b9ce0eeb7075c0113a60c8e";
 let abi=[
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "index",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "applicant",
+				"type": "address"
+			}
+		],
+		"name": "ApplicationAccepted",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "index",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "applicant",
+				"type": "address"
+			}
+		],
+		"name": "ApplicationCreated",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "index",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "description",
+				"type": "string"
+			}
+		],
+		"name": "RequestCreated",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "sub",
+				"type": "address"
+			}
+		],
+		"name": "Subscribed",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "requestId",
+				"type": "uint256"
+			}
+		],
+		"name": "WorkDelivered",
+		"type": "event"
+	},
 	{
 		"inputs": [
 			{
@@ -69,24 +152,6 @@ let abi=[
 			}
 		],
 		"name": "Deliver",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "illustratorName",
-				"type": "string"
-			},
-			{
-				"internalType": "enum IndependentIllustratorsExchange.SubscriptionType",
-				"name": "subscriptionType",
-				"type": "uint8"
-			}
-		],
-		"name": "Subscribe",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -232,6 +297,24 @@ let abi=[
 	{
 		"inputs": [
 			{
+				"internalType": "string",
+				"name": "illustratorName",
+				"type": "string"
+			},
+			{
+				"internalType": "enum IndependentIllustratorsExchange.SubscriptionType",
+				"name": "subscriptionType",
+				"type": "uint8"
+			}
+		],
+		"name": "Subscribe",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
 				"internalType": "address",
 				"name": "",
 				"type": "address"
@@ -279,9 +362,9 @@ function createRequest()
 {
     var _mxContract = new ethers.Contract(contract, abi, dapp.provider.getSigner());
 
-    var description = $("#createDescription");
-    var acceptedDelay = $("#createAcceptedDelay");
-    var reputation = $("#createMinimumReputation");
+    var description = $("#createDescription").val();
+    var acceptedDelay = parseInt($("#createAcceptedDelay").val());
+    var reputation = parseInt($("#createMinimumReputation").val());
 
     // todo : fix/finish this.
     _mxContract.CreateRequest(acceptedDelay, description, reputation).then((r) => {
@@ -319,6 +402,7 @@ async function viewRequests()
 	    var req = reqs[i];
 
 	    var alreadyApplied = false;
+	    var isCreator = req.Requester.toLowerCase() == dapp.address.toLowerCase();
 	    
 	    for (j = 0; j < req.Applications.length; j++)
 	    {
@@ -343,16 +427,27 @@ async function viewRequests()
 		onClickAction = "return false;";
 		icon = "&check;";
 	    }
-	    
+	    if (i > 0) {
+		body += "    +----------------------------------------------------------";
+	    }
 	    body +=
-	    	  "<a href='#' onclick='"+onClickAction+"'>["+icon+"]</a> | "
+		"<br/>"
+		+ "<a href='#' onclick='"+onClickAction+"'>["+icon+"]</a> | "
 	    	+       "Description: '"
 		+ req.Description
 		+ "'<br/>"
 	    
 		+ "    | Author: " + "'"
 	        + req.Requester
-		+ "' <br/>"
+	   	+ "'";
+	   
+
+	    if (isCreator)
+	    {
+		body += "<b>(you)</b>";
+	    }
+	    
+	    body += "<br/>"
 
 		+ "    | Min reputation: "
 		+ req.MinReputation
@@ -360,7 +455,29 @@ async function viewRequests()
 
 		+ "    | Applications: "
 		+ req.Applications.length
-		+ "<br/>"
+	    ;
+	    
+	    for (a = 0; a < req.Applications.length; a++)
+	    {
+		
+		body += "<br/>"
+		    + "    | +-> ";
+
+		if (isCreator)
+		{
+		    body += "<a href=''>Accept</a> _ ";
+		}
+		
+		body += req.Applications[a];
+
+		if (isCreator)
+		{
+		    body += "</a>";
+		}
+	    }
+	    
+	    body += 
+		 "<br/>"
 		+ "    | Already Applied: ";
 	    
 
@@ -373,12 +490,14 @@ async function viewRequests()
 	    {
 		body += "No";
 	    }
-	    
-	    body += "</pre>";
+	
+	    body += "<br/>";
 	    
 	    $('#content').html(body);
 	}
-    });   
+    });
+
+    $('#content').html('</pre>');
 }
 
 async function viewCreateRequest()
@@ -408,6 +527,8 @@ async function connectToMetaMask() {
 	const provider = new ethers.providers.Web3Provider(ethereum);
 	dapp = { address, provider };
 	console.log(dapp)
+	$('#welcomeMessage').html("<pre>You: "+dapp.address.toLowerCase()+"</pre>");
+	
     } catch(err) {
 	console.error(err);
     }
