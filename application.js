@@ -277,12 +277,14 @@ function applyToRequest(requestId)
 
 function createRequest()
 {
+    var _mxContract = new ethers.Contract(contract, abi, dapp.provider.getSigner());
+
     var description = $("#createDescription");
     var acceptedDelay = $("#createAcceptedDelay");
     var reputation = $("#createMinimumReputation");
 
     // todo : fix/finish this.
-    _mxContract.CreateRequest(description, acceptedDelay, reputation).then((r) => {
+    _mxContract.CreateRequest(acceptedDelay, description, reputation).then((r) => {
 	console.log(r);
     });
 }
@@ -383,7 +385,6 @@ async function viewCreateRequest()
 {
     let content = "&nbsp; &nbsp; <center><pre><form class='form'>"
 
-
 	+ "Description: "
 	+ "<input type='text' id='createDescription' style='border: 0; border-bottom: 1px solid black;'></input>"
 	+ " <br/><br/>"
@@ -397,8 +398,7 @@ async function viewCreateRequest()
 	+ "</form>"
 	+ "<a href='#' onclick='createRequest()'>Create</a></pre></center>";
     
-    $("#content").html(content);
-    
+    $("#content").html(content);    
 }
 
 async function connectToMetaMask() {

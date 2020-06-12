@@ -8,6 +8,11 @@ import "github.com/OpenZeppelin/openzeppelin-solidity/contracts/math/SafeMath.so
 
 contract IndependentIllustratorsExchange 
 {
+
+    event Subscribed(address sub);
+    event RequestCreated(uint index, string description);
+    
+
     struct Illustrator 
     {
         uint Reputation;
@@ -20,8 +25,7 @@ contract IndependentIllustratorsExchange
     
     struct Request 
     {
-	uint CreationTimestamp;
-	RequestState State;
+        RequestState State;
         address Requester;
         uint PaymentWei;
         uint AcceptDelaySeconds;
@@ -45,6 +49,8 @@ contract IndependentIllustratorsExchange
             Illustrators[msg.sender] = Illustrator(1, illustratorName);
         
         Subscriptions[msg.sender] = true;
+        
+        emit Subscribed(msg.sender);
     }
     
    function CreateRequest(uint acceptDelaySeconds, string memory description, uint minReputation) payable public
@@ -64,6 +70,8 @@ contract IndependentIllustratorsExchange
                                         address(0),
                                         bytes32(0));
        Requests.push(request);
+       
+       emit RequestCreated(Requests.length, description);
    }
    
    function ApplyToRequest(uint requestId) public
