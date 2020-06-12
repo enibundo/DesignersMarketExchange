@@ -334,6 +334,29 @@ let abi=[
 ];
 
 // --- callback functions
+function getState(stateInt)
+{
+    var states = ["Default", "Open", "Ongoing", "Closed"];
+    return states[stateInt];
+}
+
+function deliver(requestId)
+{
+    console.log(requestId);
+
+    bootbox.prompt("Please enter delivery hash!", function(result){ 
+	var _mxContract = new ethers.Contract(contract, abi, dapp.provider.getSigner());
+
+	_mxContract.Deliver(requestId, ethers.utils.formatBytes32String(result));	
+    });
+}
+
+function acceptApplication(requestId, applicationAddress)
+{
+    var _mxContract = new ethers.Contract(contract, abi, dapp.provider.getSigner());
+    _mxContract.AcceptApplication(requestId, applicationAddress).then((r)=>{console.log(r);});
+}
+
 
 function subscribe()
 {
@@ -403,6 +426,7 @@ async function viewRequests()
 
 	    var alreadyApplied = false;
 	    var isCreator = req.Requester.toLowerCase() == dapp.address.toLowerCase();
+	    var isOpen = req.State == 1;
 	    
 	    for (j = 0; j < req.Applications.length; j++)
 	    {
@@ -421,23 +445,42 @@ async function viewRequests()
 
 	    var icon = "A";
 	    var onClickAction = "applyToRequest("+i+")";
+	    var toolTip = "Apply!";
+	    if (alreadyApplied)
+		toolTip = "Already Applied";
+	    
+	    var aHrefBeginning = "<a href='#' onclick='"+onClickAction+"' data-toggle='tooltip' title='"+toolTip+"'>";
+	    var aHrefEnd = "</a>";
+	    var deliverIcon = "   ";
 	    
 	    if (alreadyApplied)
 	    {
 		onClickAction = "return false;";
 		icon = "&check;";
+
+		if (req.State == 2 && req.ChosenApplication.toLowerCase() == dapp.address.toLowerCase())
+		{ 
+		    deliverIcon = "<a href='#' onClick='deliver("+i+")' data-toggle='tooltip' title='Deliver!!!'>[D]</a>";
+		}
 	    }
+	    
 	    if (i > 0) {
 		body += "    +----------------------------------------------------------";
 	    }
 	    body +=
 		"<br/>"
-		+ "<a href='#' onclick='"+onClickAction+"'>["+icon+"]</a> | "
+		+ aHrefBeginning
+	    
+		+ "["+icon+"]"+aHrefEnd+" | "
 	    	+       "Description: '"
 		+ req.Description
 		+ "'<br/>"
+		+ deliverIcon
+		+ " | State: '"
+		+ getState(req.State)
+		+ "'<br/>"
 	    
-		+ "    | Author: " + "'"
+		+ "    | Author: '"
 	        + req.Requester
 	   	+ "'";
 	   
@@ -459,20 +502,26 @@ async function viewRequests()
 	    
 	    for (a = 0; a < req.Applications.length; a++)
 	    {
-		
+		var isChosen = req.Applications[a].toLowerCase() == req.ChosenApplication.toLowerCase();
+		    
 		body += "<br/>"
 		    + "    | +-> ";
 
-		if (isCreator)
+		if (isCreator && isOpen)
 		{
-		    body += "<a href=''>Accept</a> _ ";
+		    body += "<a href='#' onClick='acceptApplication("+i+", \""+req.Applications[a].toString()+"\")'>Accept</a> _";
 		}
-		
+
+		if (isChosen)
+		{
+		    body += "<b>";
+		}
+
 		body += req.Applications[a];
 
-		if (isCreator)
+		if (isChosen)
 		{
-		    body += "</a>";
+		    body += "</b>";
 		}
 	    }
 	    
@@ -534,5 +583,8 @@ async function connectToMetaMask() {
     }
 }
 
-// -- main
-connectToMetaMask();
+$(document).ready(function(){
+    connectToMetaMask();
+
+    $('[data-toggle="tooltip"]').tooltip();
+});
