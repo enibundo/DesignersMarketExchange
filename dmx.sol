@@ -11,7 +11,9 @@ contract IndependentIllustratorsExchange
 
     event Subscribed(address sub);
     event RequestCreated(uint index, string description);
-    
+    event ApplicationAccepted(uint index, address applicant);    
+    event ApplicationCreated(uint index, address applicant);
+    event WorkDelivered(uint requestId);
 
     struct Illustrator 
     {
@@ -81,6 +83,8 @@ contract IndependentIllustratorsExchange
        require(Requests[requestId].State == RequestState.Open, "Should be open request");
        
        Requests[requestId].Applications.push(msg.sender);
+       
+       emit ApplicationCreated(requestId, msg.sender);
    }
    
    function AcceptApplication(uint requestId, address illustratorsAddress) public
@@ -89,6 +93,8 @@ contract IndependentIllustratorsExchange
        
        Requests[requestId].State = RequestState.Ongoing;
        Requests[requestId].ChosenApplication = illustratorsAddress;
+       
+       emit ApplicationAccepted(requestId, illustratorsAddress);
    }
    
    function GetRequests() public view returns (Request[] memory)
@@ -105,5 +111,7 @@ contract IndependentIllustratorsExchange
        msg.sender.transfer(Requests[requestId].PaymentWei);
        Requests[requestId].State = RequestState.Closed;
        Requests[requestId].Artifact = artifact;
+       
+       emit WorkDelivered(requestId);
    }
 }
