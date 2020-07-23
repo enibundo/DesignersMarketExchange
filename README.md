@@ -10,17 +10,13 @@ You will need metamask to interact with it.
 ### Subscription Screen
 ![Subscription](sub.jpg)
 
-### Subscription Screen
+### Createn Screen
 ![Create](create.jpg)
-
-### View Requests Screen
-![Requests](requests.png)
 
 ### Applys Screen
 ![Apply](apply.jpg)
 
 ### Accept Screen
 ![Accept](accept.jpg)
-
 
 ---- 
