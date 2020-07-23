@@ -30,6 +30,7 @@ contract IndependentIllustratorsExchange
         RequestState State;
         address Requester;
         uint PaymentWei;
+        uint CreationTime;
         uint AcceptDelaySeconds;
         string Description;
         uint MinReputation;
@@ -65,6 +66,7 @@ contract IndependentIllustratorsExchange
        Request memory request = Request(RequestState.Open, 
                                         msg.sender, 
                                         paymentInWei, 
+                                        now,    
                                         acceptDelaySeconds, 
                                         description, 
                                         minReputation, 
@@ -81,6 +83,7 @@ contract IndependentIllustratorsExchange
        require(Subscriptions[msg.sender] == true, "You should be subscribed");
        require(Illustrators[msg.sender].Reputation >= Requests[requestId].MinReputation, "Not enough reputation");
        require(Requests[requestId].State == RequestState.Open, "Should be open request");
+       require(Requests[requestId].CreationTime + Requests[requestId].AcceptDelaySeconds > now, "Request is over");
        
        Requests[requestId].Applications.push(msg.sender);
        
@@ -107,8 +110,15 @@ contract IndependentIllustratorsExchange
        require (Illustrators[msg.sender].Reputation > 0, "Should be a registered Illustrator");
        require (Requests[requestId].ChosenApplication == msg.sender, "You are not the chosen application");
        
+       // Buump Illustrator's reputation by 1
+       // Pay Illustrator
+       // Close request
+       
+   
        Illustrators[msg.sender].Reputation = SafeMath.add(Illustrators[msg.sender].Reputation, 1); 
+       
        msg.sender.transfer(Requests[requestId].PaymentWei);
+       
        Requests[requestId].State = RequestState.Closed;
        Requests[requestId].Artifact = artifact;
        
