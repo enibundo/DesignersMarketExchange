@@ -60,7 +60,7 @@ contract IndependentIllustratorsExchange
    {
        require (Subscriptions[msg.sender] == true, "Should be subscribed before creation request");
        
-       // 2% fee
+       // smart contract's 2% fee is kept
        uint paymentInWei = SafeMath.div(SafeMath.mul(msg.value, 98), 100);
        
        Request memory request = Request(RequestState.Open, 
@@ -93,6 +93,7 @@ contract IndependentIllustratorsExchange
    function AcceptApplication(uint requestId, address illustratorsAddress) public
    {
        require(Requests[requestId].Requester == msg.sender, "Cannot accept application, not request creator");
+       require(Subscriptions[illustratorsAddress], "Unknown address");
        
        Requests[requestId].State = RequestState.Ongoing;
        Requests[requestId].ChosenApplication = illustratorsAddress;
