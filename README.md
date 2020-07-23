@@ -16,4 +16,11 @@ You will need metamask to interact with it.
 ### View Requests Screen
 ![Requests](requests.png)
 
+### Applys Screen
+![Apply](apply.jpg)
+
+### Accept Screen
+![Accept](accept.jpg)
+
+
 ---- 
