@@ -60,7 +60,7 @@ contract IndependentIllustratorsExchange
        require (Subscriptions[msg.sender] == true, "Should be subscribed before creation request");
        
        // 2% fee
-       uint paymentInWei = SafeMath.div(SafeMath.mul(msg.value, 2), 100);
+       uint paymentInWei = SafeMath.div(SafeMath.mul(msg.value, 98), 100);
        
        Request memory request = Request(RequestState.Open, 
                                         msg.sender, 
