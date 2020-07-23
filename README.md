@@ -1,5 +1,3 @@
-// wip
-
 # Designer's Market Exchange
 Just a small contract that implements an exchange for independent designers.
 
@@ -19,8 +17,3 @@ You will need metamask to interact with it.
 ![Requests](requests.png)
 
 ---- 
-
-### TODO:
-- make ui
-- add events
-- testnet
