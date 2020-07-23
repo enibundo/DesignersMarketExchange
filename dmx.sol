@@ -84,6 +84,7 @@ contract IndependentIllustratorsExchange
        require(Illustrators[msg.sender].Reputation >= Requests[requestId].MinReputation, "Not enough reputation");
        require(Requests[requestId].State == RequestState.Open, "Should be open request");
        require(Requests[requestId].CreationTime + Requests[requestId].AcceptDelaySeconds > now, "Request is over");
+       require(requestId < Requests.length, "requestId is out of bounds");
        
        Requests[requestId].Applications.push(msg.sender);
        
@@ -94,6 +95,7 @@ contract IndependentIllustratorsExchange
    {
        require(Requests[requestId].Requester == msg.sender, "Cannot accept application, not request creator");
        require(Subscriptions[illustratorsAddress], "Unknown address");
+       require(requestId < Requests.length, "requestId is out of bounds");
        
        Requests[requestId].State = RequestState.Ongoing;
        Requests[requestId].ChosenApplication = illustratorsAddress;
@@ -110,6 +112,7 @@ contract IndependentIllustratorsExchange
    {
        require (Illustrators[msg.sender].Reputation > 0, "Should be a registered Illustrator");
        require (Requests[requestId].ChosenApplication == msg.sender, "You are not the chosen application");
+       require(requestId < Requests.length, "requestId is out of bounds");
        
        // Buump Illustrator's reputation by 1
        // Pay Illustrator
