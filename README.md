@@ -3,7 +3,7 @@
 # Designer's Market Exchange
 Just a small contract that implements an exchange for independent designers.
 
-dApp currently deployed on Ropsten : 0xec5ceb302bf9d2137f553ab1ffb5af39a775ca26
+dApp currently deployed on Ropsten : 0x48edd3f63E6b3B23eF03E0898df6687bEC21aCA0
 
 You will need metamask to interact with it.
 

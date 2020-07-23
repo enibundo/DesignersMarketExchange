@@ -9,7 +9,7 @@ import "github.com/OpenZeppelin/openzeppelin-solidity/contracts/math/SafeMath.so
 contract IndependentIllustratorsExchange 
 {
 
-    event Subscribed(address sub);
+    event Subscribed(address subAddress);
     event RequestCreated(uint index, string description);
     event ApplicationAccepted(uint index, address applicant);    
     event ApplicationCreated(uint index, address applicant);
